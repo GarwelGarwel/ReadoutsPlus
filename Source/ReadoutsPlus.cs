@@ -12,7 +12,6 @@ namespace ReadoutsPlus
     {
         static ReadoutsPlus()
         {
-            Log("Starting ReadoutsPlus...");
             Harmony harmony = new Harmony("ReadoutsPlus");
             if (harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoThingDef"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoThingDef"))) == null
                 || harmony.Patch(AccessTools.Method("ResourceReadout:DrawResourceSimple"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("ResourceReadout_DrawResourceSimple"))) == null)
@@ -28,7 +27,11 @@ namespace ReadoutsPlus
         static Thing NextUnselectedThing(ThingDef thingDef)
         {
             List<Thing> things = Find.CurrentMap.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef).ToList();
-            Log($"{things.Count} {thingDef} things found on the map.");
+            if (things.NullOrEmpty())
+            {
+                Log($"List of {thingDef} on the map is null or empty.", true);
+                return null;
+            }
             Thing selected = Find.Selector.SingleSelectedThing;
             int i = 0;
             if (selected?.def == thingDef)
@@ -53,7 +56,7 @@ namespace ReadoutsPlus
 
         static void ProcessClick(Rect rect, ThingDef thingDef)
         {
-            if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown)
+            if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
                 if (Event.current.clickCount == 1)
                     CameraJumper.TryJumpAndSelect(NextUnselectedThing(thingDef));
@@ -65,17 +68,16 @@ namespace ReadoutsPlus
 
         public static void Listing_ResourceReadout_DoThingDef(Listing_ResourceReadout __instance, ThingDef thingDef, int nestLevel)
         {
-            if (Find.CurrentMap.resourceCounter.GetCount(thingDef) == 0)
-                return;
-            Rect rect = new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight - __instance.lineHeight - __instance.verticalSpacing, __instance.ColumnWidth, __instance.lineHeight);
-            ProcessClick(rect, thingDef);
+            if (Find.CurrentMap.resourceCounter.GetCount(thingDef) > 0)
+                ProcessClick(
+                    new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight - __instance.lineHeight - __instance.verticalSpacing, __instance.ColumnWidth, __instance.lineHeight),
+                    thingDef);
         }
 
         public static void ResourceReadout_DrawResourceSimple(Rect rect, ThingDef thingDef)
         {
             if (Find.CurrentMap.resourceCounter.GetCount(thingDef) == 0)
                 return;
-            Log($"ResourceReadout_DrawResourceSimple({rect}, {thingDef})");
             if (Mouse.IsOver(rect))
                 GUI.DrawTexture(rect, TexUI.HighlightTex);
             ProcessClick(rect, thingDef);
