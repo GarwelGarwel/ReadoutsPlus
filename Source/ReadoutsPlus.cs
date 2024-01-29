@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,21 +14,19 @@ namespace ReadoutsPlus
         {
             Log("Starting ReadoutsPlus...");
             Harmony harmony = new Harmony("ReadoutsPlus");
-            if (harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoThingDef"), prefix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoThingDef"))) == null)
-                Log("Failed to apply Harmony patch!");
+            if (harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoThingDef"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoThingDef"))) == null)
+                Log("Failed to apply Harmony patch!", true);
         }
 
-        static void Log(string message)
+        static void Log(string message, bool important = false)
         {
-            Verse.Log.Message($"[ReadoutsPlus] {message}");
+            if (important || Prefs.DevMode)
+                Verse.Log.Message($"[Readouts+] {message}");
         }
-
-        static ThingDef mousePosition;
 
         static Thing NextUnselectedThing(ThingDef thingDef)
         {
-            Map map = Find.CurrentMap;
-            List<Thing> things = map.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef).ToList();
+            List<Thing> things = Find.CurrentMap.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef).ToList();
             Log($"{things.Count} {thingDef} things found on the map.");
             Thing selected = Find.Selector.SingleSelectedThing;
             int i = 0;
@@ -45,25 +42,27 @@ namespace ReadoutsPlus
             return things[i];
         }
 
+        static void SelectAll(ThingDef thingDef)
+        {
+            Log($"Selecting all {thingDef} things.");
+            Find.Selector.ClearSelection();
+            foreach (Thing thing in Find.CurrentMap.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef))
+                Find.Selector.Select(thing);
+        }
+
         public static void Listing_ResourceReadout_DoThingDef(Listing_ResourceReadout __instance, ThingDef thingDef, int nestLevel)
         {
             Map map = Find.CurrentMap;
             if (map.resourceCounter.GetCount(thingDef) == 0)
                 return;
-            Rect rect = new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight, __instance.ColumnWidth, __instance.lineHeight);
+            Rect rect = new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight - __instance.lineHeight - __instance.verticalSpacing, __instance.ColumnWidth, __instance.lineHeight);
             if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown)
             {
-                mousePosition = thingDef;
-                Event.current.Use();
-            }
-            if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseUp)
-            {
-                if (mousePosition == thingDef)
-                {
+                if (Event.current.clickCount == 1)
                     CameraJumper.TryJumpAndSelect(NextUnselectedThing(thingDef));
-                    Event.current.Use();
-                }
-                mousePosition = null;
+                else if (Event.current.clickCount == 2)
+                    SelectAll(thingDef);
+                Event.current.Use();
             }
         }
     }
