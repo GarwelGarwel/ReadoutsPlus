@@ -36,7 +36,6 @@ namespace ReadoutsPlus
             int i = 0;
             if (selected?.def == thingDef)
             {
-                Log($"Thing {Find.Selector.SingleSelectedThing} is already selected.");
                 while(i < things.Count)
                     if (things[i++] == selected)
                         break;
@@ -48,7 +47,6 @@ namespace ReadoutsPlus
 
         static void SelectAll(ThingDef thingDef)
         {
-            Log($"Selecting all {thingDef} things.");
             Find.Selector.ClearSelection();
             foreach (Thing thing in Find.CurrentMap.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef))
                 Find.Selector.Select(thing);

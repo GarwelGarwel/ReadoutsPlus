@@ -8,7 +8,7 @@
 	<supportedVersions>
 		<li>1.4</li>
 	</supportedVersions>
-	<description>Makes resource readouts in the top-left corner clickable.</description>
+	<description>Click on resource readouts in the top-left corner to go to respective items.</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>
