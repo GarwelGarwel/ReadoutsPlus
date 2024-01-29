@@ -3,8 +3,6 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
@@ -31,7 +29,7 @@ namespace ReadoutsPlus
         static Thing NextUnselectedThing(ThingDef thingDef)
         {
             Map map = Find.CurrentMap;
-            List<Thing> things = map.listerThings.ThingsOfDef(thingDef);
+            List<Thing> things = map.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef).ToList();
             Log($"{things.Count} {thingDef} things found on the map.");
             Thing selected = Find.Selector.SingleSelectedThing;
             int i = 0;
