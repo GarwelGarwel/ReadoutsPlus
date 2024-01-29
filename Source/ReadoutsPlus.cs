@@ -14,7 +14,8 @@ namespace ReadoutsPlus
         {
             Log("Starting ReadoutsPlus...");
             Harmony harmony = new Harmony("ReadoutsPlus");
-            if (harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoThingDef"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoThingDef"))) == null)
+            if (harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoThingDef"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoThingDef"))) == null
+                || harmony.Patch(AccessTools.Method("ResourceReadout:DrawResourceSimple"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("ResourceReadout_DrawResourceSimple"))) == null)
                 Log("Failed to apply Harmony patch!", true);
         }
 
@@ -50,12 +51,8 @@ namespace ReadoutsPlus
                 Find.Selector.Select(thing);
         }
 
-        public static void Listing_ResourceReadout_DoThingDef(Listing_ResourceReadout __instance, ThingDef thingDef, int nestLevel)
+        static void ProcessClick(Rect rect, ThingDef thingDef)
         {
-            Map map = Find.CurrentMap;
-            if (map.resourceCounter.GetCount(thingDef) == 0)
-                return;
-            Rect rect = new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight - __instance.lineHeight - __instance.verticalSpacing, __instance.ColumnWidth, __instance.lineHeight);
             if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown)
             {
                 if (Event.current.clickCount == 1)
@@ -64,6 +61,24 @@ namespace ReadoutsPlus
                     SelectAll(thingDef);
                 Event.current.Use();
             }
+        }
+
+        public static void Listing_ResourceReadout_DoThingDef(Listing_ResourceReadout __instance, ThingDef thingDef, int nestLevel)
+        {
+            if (Find.CurrentMap.resourceCounter.GetCount(thingDef) == 0)
+                return;
+            Rect rect = new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight - __instance.lineHeight - __instance.verticalSpacing, __instance.ColumnWidth, __instance.lineHeight);
+            ProcessClick(rect, thingDef);
+        }
+
+        public static void ResourceReadout_DrawResourceSimple(Rect rect, ThingDef thingDef)
+        {
+            if (Find.CurrentMap.resourceCounter.GetCount(thingDef) == 0)
+                return;
+            Log($"ResourceReadout_DrawResourceSimple({rect}, {thingDef})");
+            if (Mouse.IsOver(rect))
+                GUI.DrawTexture(rect, TexUI.HighlightTex);
+            ProcessClick(rect, thingDef);
         }
     }
 }
