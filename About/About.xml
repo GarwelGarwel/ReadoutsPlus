@@ -8,7 +8,7 @@
 	<supportedVersions>
 		<li>1.4</li>
 	</supportedVersions>
-	<description>Click on resource readouts in the top-left corner to go to respective items.</description>
+	<description>Click on resource readouts to select respective items, double-click to select all such items. Open and close resource categories by clicking on the labels.</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace ReadoutsPlus
 {
@@ -14,7 +15,8 @@ namespace ReadoutsPlus
         {
             Harmony harmony = new Harmony("ReadoutsPlus");
             if (harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoThingDef"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoThingDef"))) == null
-                || harmony.Patch(AccessTools.Method("ResourceReadout:DrawResourceSimple"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("ResourceReadout_DrawResourceSimple"))) == null)
+                || harmony.Patch(AccessTools.Method("ResourceReadout:DrawResourceSimple"), postfix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("ResourceReadout_DrawResourceSimple"))) == null
+                || harmony.Patch(AccessTools.Method("Listing_ResourceReadout:DoCategory"), prefix: new HarmonyMethod(typeof(ReadoutsPlus).GetMethod("Listing_ResourceReadout_DoCategory"))) == null)
                 Log("Failed to apply Harmony patch!", true);
         }
 
@@ -79,6 +81,22 @@ namespace ReadoutsPlus
             if (Mouse.IsOver(rect))
                 GUI.DrawTexture(rect, TexUI.HighlightTex);
             ProcessClick(rect, thingDef);
+        }
+
+        public static void Listing_ResourceReadout_DoCategory(Listing_ResourceReadout __instance, TreeNode_ThingCategory node, int nestLevel, int openMask)
+        {
+            Rect rect = new Rect(nestLevel * __instance.nestIndentWidth + 18, __instance.CurHeight, __instance.ColumnWidth, __instance.lineHeight);
+            if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+                if (__instance.IsOpen(node, openMask))
+                {
+                    SoundDefOf.TabClose.PlayOneShotOnCamera();
+                    node.SetOpen(openMask, false);
+                }
+                else
+                {
+                    SoundDefOf.TabOpen.PlayOneShotOnCamera();
+                    node.SetOpen(openMask, true);
+                }
         }
     }
 }
