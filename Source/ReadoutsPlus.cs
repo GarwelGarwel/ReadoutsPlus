@@ -24,16 +24,16 @@ namespace ReadoutsPlus
                 Verse.Log.Message($"[Readouts+] {message}");
         }
 
-        static Thing NextUnselectedThing(ThingDef thingDef)
+        static void SelectNextThing(ThingDef thingDef)
         {
             List<Thing> things = Find.CurrentMap.haulDestinationManager.AllGroupsListForReading.SelectMany(group => group.HeldThings).Where(thing => thing.def == thingDef).ToList();
             if (things.NullOrEmpty())
             {
                 Log($"List of {thingDef} on the map is null or empty.", true);
-                return null;
+                return;
             }
-            Thing selected = Find.Selector.SingleSelectedThing;
             int i = 0;
+            Thing selected = Find.Selector.SingleSelectedThing;
             if (selected?.def == thingDef)
             {
                 while(i < things.Count)
@@ -42,7 +42,7 @@ namespace ReadoutsPlus
                 if (i >= things.Count)
                     i = 0;
             }
-            return things[i];
+            CameraJumper.TryJumpAndSelect(things[i]);
         }
 
         static void SelectAll(ThingDef thingDef)
@@ -57,7 +57,7 @@ namespace ReadoutsPlus
             if (Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
                 if (Event.current.clickCount == 1)
-                    CameraJumper.TryJumpAndSelect(NextUnselectedThing(thingDef));
+                    SelectNextThing(thingDef);
                 else if (Event.current.clickCount == 2)
                     SelectAll(thingDef);
                 Event.current.Use();
