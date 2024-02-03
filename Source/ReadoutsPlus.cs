@@ -29,7 +29,7 @@ namespace ReadoutsPlus
             Thing selected = Find.Selector.SingleSelectedThing;
             if (selected?.def == thingDef)
             {
-                while(i < things.Count)
+                while (i < things.Count)
                     if (things[i++] == selected)
                         break;
                 if (i >= things.Count)
