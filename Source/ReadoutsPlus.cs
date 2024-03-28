@@ -61,7 +61,6 @@ namespace ReadoutsPlus
                 && AnyOfCategoryOnCurrentMap(node.catDef))
             {
                 bool isOpen = __instance.IsOpen(node, openMask);
-                Log($"Click on {node.catDef.defName} category. It is currently {(isOpen ?  "open" : "closed")}.");
                 if (isOpen)
                     SoundDefOf.TabClose.PlayOneShotOnCamera();
                 else SoundDefOf.TabOpen.PlayOneShotOnCamera();

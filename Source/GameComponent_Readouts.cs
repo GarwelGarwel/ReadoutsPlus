@@ -52,7 +52,6 @@ namespace ReadoutsPlus
 
         public override void ExposeData()
         {
-            ReadoutsPlus.Log($"GameComponent_Readouts.ExposeData (mode: {Scribe.mode})");
             List<ThingCategoryDef> openCategories = null;
             if (Scribe.mode == LoadSaveMode.Saving)
             {
