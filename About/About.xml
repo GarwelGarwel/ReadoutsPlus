@@ -8,6 +8,7 @@
 	<supportedVersions>
 		<li>1.4</li>
 		<li>1.5</li>
+		<li>1.6</li>
 	</supportedVersions>
 	<description>Click on resource readouts to select respective items, double-click to select all such items. Open and close resource categories by clicking on the labels. Opened categories are remembered per game.</description>
 	<modDependencies>
