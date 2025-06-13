@@ -60,11 +60,19 @@ namespace ReadoutsPlus
                 && Event.current.button == 0
                 && AnyOfCategoryOnCurrentMap(node.catDef))
             {
-                bool isOpen = __instance.IsOpen(node, openMask);
-                if (isOpen)
+                if (Event.current.clickCount == 1)
+                {
+                    bool isOpen = __instance.IsOpen(node, openMask);
+                    if (isOpen)
+                        SoundDefOf.TabClose.PlayOneShotOnCamera();
+                    else SoundDefOf.TabOpen.PlayOneShotOnCamera();
+                    node.SetOpen(openMask, !isOpen);
+                }
+                else if (Event.current.clickCount == 2)
+                {
+                    Current.Game?.GetComponent<GameComponent_Readouts>()?.CloseAllCategories();
                     SoundDefOf.TabClose.PlayOneShotOnCamera();
-                else SoundDefOf.TabOpen.PlayOneShotOnCamera();
-                node.SetOpen(openMask, !isOpen);
+                }
                 Event.current.Use();
             }
         }
